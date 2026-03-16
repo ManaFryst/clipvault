@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ClipVault — Send Secret</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0a0a0b;
+      --surface: #111113;
+      --border: #222226;
+      --border-bright: #333338;
+      --text: #e8e8ec;
+      --muted: #555560;
+      --accent: #00d4aa;
+      --accent-dim: rgba(0, 212, 170, 0.12);
+      --accent-glow: rgba(0, 212, 170, 0.3);
+      --danger: #ff4757;
+      --mono: 'IBM Plex Mono', monospace;
+      --sans: 'IBM Plex Sans', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      padding: 48px 24px 80px;
+      min-height: 100vh;
+    }
+
+    /* Background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      max-width: 580px;
+    }
+
+    header {
+      margin-bottom: 48px;
+      text-align: left;
+    }
+
+    .logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent);
+      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-family: var(--mono);
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: var(--accent);
+    }
+
+    .tagline {
+      font-family: var(--mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 32px;
+      margin-bottom: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent), transparent);
+      opacity: 0.5;
+    }
+
+    .section-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 16px;
+    }
+
+    textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.6;
+      padding: 16px;
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    textarea::placeholder { color: var(--muted); }
+
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 1px var(--accent-dim), inset 0 0 20px rgba(0,212,170,0.02);
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    .expiry-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .expiry-row label {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 12px;
+      padding: 6px 10px;
+      cursor: pointer;
+      outline: none;
+    }
+
+    select:focus { border-color: var(--accent); }
+
+    .btn {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      padding: 10px 24px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-primary:hover {
+      background: #00f0c0;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .btn-primary:active { transform: translateY(1px); }
+
+    .btn-primary:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result-card {
+      display: none;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 4px;
+      padding: 28px 32px;
+      margin-bottom: 16px;
+      box-shadow: 0 0 40px rgba(0,212,170,0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card.visible { display: block; }
+
+    .result-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .link-display {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 3px;
+      padding: 12px 16px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--accent);
+      word-break: break-all;
+      margin: 12px 0;
+      cursor: pointer;
+      transition: border-color 0.2s;
+      position: relative;
+    }
+
+    .link-display:hover { border-color: var(--accent); }
+
+    .copy-hint {
+      font-family: var(--mono);
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .qr-wrapper {
+      margin-top: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .qr-label {
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    #qrcode {
+      padding: 12px;
+      background: #fff;
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    #qrcode canvas, #qrcode img { display: block; }
+
+    .timer-bar-wrap {
+      margin-top: 20px;
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .timer-bar {
+      height: 100%;
+      background: var(--accent);
+      width: 100%;
+      transition: width linear;
+      border-radius: 2px;
+    }
+
+    .timer-text {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 6px;
+      text-align: right;
+    }
+
+    .timer-text span { color: var(--accent); }
+
+    .security-note {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      line-height: 1.7;
+      padding: 16px 24px;
+      border-left: 2px solid var(--border);
+      margin-top: 8px;
+    }
+
+    .security-note strong { color: var(--text); }
+
+    .dot {
+      display: inline-block;
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    .error-msg {
+      display: none;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--danger);
+      margin-top: 8px;
+    }
+
+    .error-msg.visible { display: block; }
+
+    .nav-link {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.05em;
+    }
+    .nav-link:hover { color: var(--accent); }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .result-card.visible {
+      animation: fadeIn 0.3s ease;
+    }
+
+    .btn-copy-link {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-family: var(--mono);
+      font-size: 11px;
+      padding: 5px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 8px;
+    }
+    .btn-copy-link:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="logo">
+        <div class="logo-icon"></div>
+        <span class="logo-text">ClipVault</span>
+      </div>
+      <div class="tagline">end-to-end encrypted · zero-knowledge · self-destruct</div>
+    </header>
+
+    <div class="card">
+      <div class="section-label">// send secret</div>
+      <textarea id="secret-input" placeholder="Paste your password or secret text here…" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+
+      <div class="controls">
+        <div class="expiry-row">
+          <label>Expires in</label>
+          <select id="expiry-select">
+            <option value="30000">30 seconds</option>
+            <option value="60000" selected>60 seconds</option>
+            <option value="120000">2 minutes</option>
+            <option value="300000">5 minutes</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" id="send-btn">Encrypt &amp; Send →</button>
+      </div>
+      <div class="error-msg" id="error-msg"></div>
+    </div>
+
+    <div class="result-card" id="result-card">
+      <div class="section-label">// secret ready — share once</div>
+      <div id="link-display" class="link-display" title="Click to copy"></div>
+      <button class="btn-copy-link" id="copy-link-btn">Copy link</button>
+
+      <div class="qr-wrapper">
+        <div class="qr-label">// scan to retrieve</div>
+        <div id="qrcode"></div>
+      </div>
+
+      <div class="timer-bar-wrap">
+        <div class="timer-bar" id="timer-bar"></div>
+      </div>
+      <div class="timer-text">Self-destructs in <span id="countdown">—</span></div>
+    </div>
+
+    <div class="security-note">
+      <span class="dot"></span><strong>Zero-knowledge</strong> — the server never sees your plaintext.<br>
+      <span class="dot"></span><strong>One-time read</strong> — secret is deleted on first access.<br>
+      <span class="dot"></span>The decryption key lives only in the URL fragment (#), never sent to the server.
+    </div>
+  </div>
+
+  <script>
+    // ── Crypto helpers ────────────────────────────────────────────────────────
+
+    async function generateKey() {
+      return crypto.subtle.generateKey(
+        { name: 'AES-GCM', length: 256 },
+        true,
+        ['encrypt', 'decrypt']
+      );
+    }
+
+    async function exportKey(key) {
+      const raw = await crypto.subtle.exportKey('raw', key);
+      return btoa(String.fromCharCode(...new Uint8Array(raw)));
+    }
+
+    async function importKey(b64) {
+      const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+      return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['decrypt']);
+    }
+
+    async function encryptText(plaintext, key) {
+      const iv = crypto.getRandomValues(new Uint8Array(12));
+      const encoded = new TextEncoder().encode(plaintext);
+      const cipherbuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
+      return {
+        ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipherbuf))),
+        iv: btoa(String.fromCharCode(...iv))
+      };
+    }
+
+    // ── UI ────────────────────────────────────────────────────────────────────
+
+    const sendBtn = document.getElementById('send-btn');
+    const input = document.getElementById('secret-input');
+    const resultCard = document.getElementById('result-card');
+    const linkDisplay = document.getElementById('link-display');
+    const copyLinkBtn = document.getElementById('copy-link-btn');
+    const errorMsg = document.getElementById('error-msg');
+    const qrDiv = document.getElementById('qrcode');
+    const timerBar = document.getElementById('timer-bar');
+    const countdownEl = document.getElementById('countdown');
+
+    let countdownInterval = null;
+
+    function showError(msg) {
+      errorMsg.textContent = msg;
+      errorMsg.classList.add('visible');
+    }
+
+    function clearError() {
+      errorMsg.classList.remove('visible');
+    }
+
+    sendBtn.addEventListener('click', async () => {
+      const text = input.value.trim();
+      if (!text) { showError('Please enter a secret to send.'); return; }
+      if (text.length > 8000) { showError('Secret is too long (max ~8000 chars).'); return; }
+
+      clearError();
+      sendBtn.disabled = true;
+      sendBtn.textContent = 'Encrypting…';
+
+      try {
+        const key = await generateKey();
+        const keyB64 = await exportKey(key);
+        const { ciphertext, iv } = await encryptText(text, key);
+        const expiryMs = parseInt(document.getElementById('expiry-select').value);
+
+        const res = await fetch('/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ciphertext, iv, salt: 'v1', expiry: expiryMs })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Server error');
+
+        const { id, expires_in } = data;
+        const origin = window.location.origin;
+        const fullUrl = `${origin}/get/${id}#${keyB64}`;
+
+        linkDisplay.textContent = fullUrl;
+        resultCard.classList.add('visible');
+        input.value = '';
+
+        // QR code
+        qrDiv.innerHTML = '';
+        new QRCode(qrDiv, {
+          text: fullUrl,
+          width: 160,
+          height: 160,
+          colorDark: '#000000',
+          colorLight: '#ffffff',
+          correctLevel: QRCode.CorrectLevel.M
+        });
+
+        // Copy link button
+        copyLinkBtn.onclick = () => {
+          navigator.clipboard.writeText(fullUrl).then(() => {
+            copyLinkBtn.textContent = '✓ Copied';
+            setTimeout(() => { copyLinkBtn.textContent = 'Copy link'; }, 2000);
+          });
+        };
+
+        linkDisplay.onclick = () => copyLinkBtn.click();
+
+        // Countdown
+        if (countdownInterval) clearInterval(countdownInterval);
+        const expiresAt = Date.now() + expires_in;
+        timerBar.style.transition = `width ${expires_in}ms linear`;
+
+        // Trigger reflow to restart animation
+        void timerBar.offsetWidth;
+        timerBar.style.width = '0%';
+
+        countdownInterval = setInterval(() => {
+          const remaining = Math.max(0, expiresAt - Date.now());
+          const secs = Math.ceil(remaining / 1000);
+          countdownEl.textContent = `${secs}s`;
+          if (remaining <= 0) {
+            clearInterval(countdownInterval);
+            countdownEl.textContent = 'expired';
+            resultCard.style.borderColor = 'var(--danger)';
+          }
+        }, 250);
+
+      } catch (err) {
+        showError(err.message || 'Failed to send secret.');
+      } finally {
+        sendBtn.disabled = false;
+        sendBtn.textContent = 'Encrypt & Send →';
+      }
+    });
+  </script>
+</body>
+</html>

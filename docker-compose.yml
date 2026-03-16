@@ -1,0 +1,16 @@
+services:
+  clipvault:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - EXPIRY_MS=60000   # default 60 seconds
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
