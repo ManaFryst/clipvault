@@ -9,564 +9,398 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
       --bg: #0a0a0b;
       --surface: #111113;
       --border: #222226;
-      --border-bright: #333338;
       --text: #e8e8ec;
       --muted: #555560;
       --accent: #00d4aa;
-      --accent-dim: rgba(0, 212, 170, 0.12);
-      --accent-glow: rgba(0, 212, 170, 0.3);
+      --accent-dim: rgba(0,212,170,0.12);
+      --accent-glow: rgba(0,212,170,0.3);
       --danger: #ff4757;
+      --warning: #ffa502;
       --mono: 'IBM Plex Mono', monospace;
       --sans: 'IBM Plex Sans', sans-serif;
     }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      font-size: 15px;
-      line-height: 1.6;
-    }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: flex-start;
-      padding: 48px 24px 80px;
-      min-height: 100vh;
-    }
-
-    /* Background grid */
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
+    body { display: flex; flex-direction: column; align-items: center; padding: 48px 24px 80px; min-height: 100vh; }
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
       background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
     }
+    .container { position: relative; z-index: 1; width: 100%; max-width: 580px; }
+    header { margin-bottom: 40px; }
+    .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+    .logo-icon { width: 30px; height: 30px; background: var(--accent); clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); flex-shrink: 0; }
+    .logo-text { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.02em; color: var(--accent); }
+    .tagline { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 
-    .container {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 580px;
-    }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 28px 32px; margin-bottom: 14px; position: relative; overflow: hidden; }
+    .card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.4; }
+    .section-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
 
-    header {
-      margin-bottom: 48px;
-      text-align: left;
+    .input-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .btn-paste {
+      background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+      font-family: var(--mono); font-size: 11px; padding: 0 14px; border-radius: 3px;
+      cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
     }
-
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 8px;
-    }
-
-    .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: var(--accent);
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-    }
-
-    .logo-text {
-      font-family: var(--mono);
-      font-size: 18px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      color: var(--accent);
-    }
-
-    .tagline {
-      font-family: var(--mono);
-      font-size: 11px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    .card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 32px;
-      margin-bottom: 16px;
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent), transparent);
-      opacity: 0.5;
-    }
-
-    .section-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 16px;
-    }
+    .btn-paste:hover { border-color: var(--accent); color: var(--accent); }
 
     textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 14px;
-      line-height: 1.6;
-      padding: 16px;
-      resize: vertical;
-      min-height: 120px;
-      transition: border-color 0.2s;
-      outline: none;
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 3px;
+      color: var(--text); font-family: var(--mono); font-size: 14px; line-height: 1.6;
+      padding: 14px 16px; resize: vertical; min-height: 110px; transition: border-color 0.2s; outline: none;
     }
-
     textarea::placeholder { color: var(--muted); }
+    textarea:focus { border-color: var(--accent); box-shadow: inset 0 0 20px rgba(0,212,170,0.02); }
 
-    textarea:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 1px var(--accent-dim), inset 0 0 20px rgba(0,212,170,0.02);
-    }
-
-    .controls {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      margin-top: 16px;
-      flex-wrap: wrap;
-    }
-
-    .expiry-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex: 1;
-    }
-
-    .expiry-row label {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
+    .controls { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
+    .expiry-row { display: flex; align-items: center; gap: 8px; flex: 1; }
+    .expiry-row label { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
     select {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 6px 10px;
-      cursor: pointer;
-      outline: none;
+      background: var(--bg); border: 1px solid var(--border); border-radius: 3px;
+      color: var(--text); font-family: var(--mono); font-size: 12px; padding: 6px 10px; cursor: pointer; outline: none;
     }
-
     select:focus { border-color: var(--accent); }
 
-    .btn {
-      font-family: var(--mono);
-      font-size: 13px;
-      font-weight: 500;
-      letter-spacing: 0.05em;
-      padding: 10px 24px;
-      border: none;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.15s;
-      white-space: nowrap;
-    }
-
-    .btn-primary {
-      background: var(--accent);
-      color: #000;
-    }
-
-    .btn-primary:hover {
-      background: #00f0c0;
-      box-shadow: 0 0 20px var(--accent-glow);
-    }
-
+    .btn { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.05em; padding: 10px 22px; border: none; border-radius: 3px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn-primary { background: var(--accent); color: #000; }
+    .btn-primary:hover { background: #00f0c0; box-shadow: 0 0 20px var(--accent-glow); }
     .btn-primary:active { transform: translateY(1px); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-    .btn-primary:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    .result-card {
-      display: none;
-      background: var(--surface);
-      border: 1px solid var(--accent);
-      border-radius: 4px;
-      padding: 28px 32px;
-      margin-bottom: 16px;
-      box-shadow: 0 0 40px rgba(0,212,170,0.08);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .result-card.visible { display: block; }
-
-    .result-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 1px;
-      background: var(--accent);
-    }
-
-    .link-display {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 12px 16px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent);
-      word-break: break-all;
-      margin: 12px 0;
-      cursor: pointer;
-      transition: border-color 0.2s;
-      position: relative;
-    }
-
-    .link-display:hover { border-color: var(--accent); }
-
-    .copy-hint {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 4px;
-    }
-
-    .qr-wrapper {
-      margin-top: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .qr-label {
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--muted);
-    }
-
-    #qrcode {
-      padding: 12px;
-      background: #fff;
-      border-radius: 4px;
-      display: inline-block;
-    }
-
-    #qrcode canvas, #qrcode img { display: block; }
-
-    .timer-bar-wrap {
-      margin-top: 20px;
-      height: 2px;
-      background: var(--border);
-      border-radius: 2px;
-      overflow: hidden;
-    }
-
-    .timer-bar {
-      height: 100%;
-      background: var(--accent);
-      width: 100%;
-      transition: width linear;
-      border-radius: 2px;
-    }
-
-    .timer-text {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 6px;
-      text-align: right;
-    }
-
-    .timer-text span { color: var(--accent); }
-
-    .security-note {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.7;
-      padding: 16px 24px;
-      border-left: 2px solid var(--border);
-      margin-top: 8px;
-    }
-
-    .security-note strong { color: var(--text); }
-
-    .dot {
-      display: inline-block;
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--accent);
-      margin-right: 6px;
-      vertical-align: middle;
-    }
-
-    .error-msg {
-      display: none;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--danger);
-      margin-top: 8px;
-    }
-
+    .error-msg { display: none; font-family: var(--mono); font-size: 12px; color: var(--danger); margin-top: 10px; }
     .error-msg.visible { display: block; }
 
-    .nav-link {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      text-decoration: none;
-      letter-spacing: 0.05em;
+    /* ── Result card ── */
+    .result-card {
+      display: none; background: var(--surface); border: 1px solid var(--accent);
+      border-radius: 4px; padding: 28px 32px; margin-bottom: 14px;
+      box-shadow: 0 0 40px rgba(0,212,170,0.07); position: relative; overflow: hidden;
     }
-    .nav-link:hover { color: var(--accent); }
+    .result-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--accent); }
+    .result-card.visible { display: block; animation: fadeIn 0.3s ease; }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(8px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    .result-card.visible {
-      animation: fadeIn 0.3s ease;
-    }
+    /* channel blocks */
+    .channel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+    @media (max-width: 500px) { .channel-grid { grid-template-columns: 1fr; } }
 
-    .btn-copy-link {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 5px 12px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.15s;
-      margin-top: 8px;
+    .channel-block { background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: 14px 16px; }
+    .channel-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .channel-value { font-family: var(--mono); font-size: 13px; color: var(--accent); word-break: break-all; line-height: 1.5; }
+    .channel-value.passphrase { font-size: 15px; letter-spacing: 0.03em; color: #fff; }
+    .btn-copy-small {
+      display: inline-block; margin-top: 8px; background: transparent; border: 1px solid var(--border);
+      color: var(--muted); font-family: var(--mono); font-size: 10px; padding: 4px 10px;
+      border-radius: 3px; cursor: pointer; transition: all 0.15s;
     }
-    .btn-copy-link:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-copy-small:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* QR section */
+    .qr-section { margin-top: 20px; }
+    .qr-toggle {
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 3px;
+      cursor: pointer; transition: all 0.15s; width: 100%;
+    }
+    .qr-toggle:hover { border-color: var(--accent); color: var(--accent); }
+    .qr-panel { display: none; margin-top: 16px; }
+    .qr-panel.open { display: block; }
+    .qr-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
+    .qr-tab {
+      flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--muted);
+      font-family: var(--mono); font-size: 11px; padding: 6px; border-radius: 3px;
+      cursor: pointer; transition: all 0.15s; text-align: center;
+    }
+    .qr-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+    .qr-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .qr-note { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; max-width: 280px; line-height: 1.6; }
+    #qrcode { padding: 12px; background: #fff; border-radius: 4px; display: inline-block; }
+    #qrcode canvas, #qrcode img { display: block; }
+
+    /* timer */
+    .timer-bar-wrap { margin-top: 20px; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .timer-bar { height: 100%; background: var(--accent); width: 100%; transition: width linear; border-radius: 2px; }
+    .timer-text { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 6px; text-align: right; }
+    .timer-text span { color: var(--accent); }
+
+    .security-note { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; padding: 14px 20px; border-left: 2px solid var(--border); margin-top: 6px; }
+    .security-note strong { color: var(--text); }
+    .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-right: 7px; vertical-align: middle; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <div class="logo">
-        <div class="logo-icon"></div>
-        <span class="logo-text">ClipVault</span>
-      </div>
-      <div class="tagline">end-to-end encrypted · zero-knowledge · self-destruct</div>
-    </header>
-
-    <div class="card">
-      <div class="section-label">// send secret</div>
-      <textarea id="secret-input" placeholder="Paste your password or secret text here…" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
-
-      <div class="controls">
-        <div class="expiry-row">
-          <label>Expires in</label>
-          <select id="expiry-select">
-            <option value="30000">30 seconds</option>
-            <option value="60000" selected>60 seconds</option>
-            <option value="120000">2 minutes</option>
-            <option value="300000">5 minutes</option>
-          </select>
-        </div>
-        <button class="btn btn-primary" id="send-btn">Encrypt &amp; Send →</button>
-      </div>
-      <div class="error-msg" id="error-msg"></div>
+<div class="container">
+  <header>
+    <div class="logo">
+      <div class="logo-icon"></div>
+      <span class="logo-text">ClipVault</span>
     </div>
+    <div class="tagline">two-channel · zero-knowledge · one-time</div>
+  </header>
 
-    <div class="result-card" id="result-card">
-      <div class="section-label">// secret ready — share once</div>
-      <div id="link-display" class="link-display" title="Click to copy"></div>
-      <button class="btn-copy-link" id="copy-link-btn">Copy link</button>
-
-      <div class="qr-wrapper">
-        <div class="qr-label">// scan to retrieve</div>
-        <div id="qrcode"></div>
-      </div>
-
-      <div class="timer-bar-wrap">
-        <div class="timer-bar" id="timer-bar"></div>
-      </div>
-      <div class="timer-text">Self-destructs in <span id="countdown">—</span></div>
+  <div class="card">
+    <div class="section-label">// send secret</div>
+    <div class="input-row">
+      <button class="btn-paste" id="paste-btn" title="Read from clipboard">⌘ Paste from Clipboard</button>
     </div>
-
-    <div class="security-note">
-      <span class="dot"></span><strong>Zero-knowledge</strong> — the server never sees your plaintext.<br>
-      <span class="dot"></span><strong>One-time read</strong> — secret is deleted on first access.<br>
-      <span class="dot"></span>The decryption key lives only in the URL fragment (#), never sent to the server.
+    <textarea id="secret-input" placeholder="Paste your password or secret text here…" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
+    <div class="controls">
+      <div class="expiry-row">
+        <label>Expires in</label>
+        <select id="expiry-select">
+          <option value="30000">30 seconds</option>
+          <option value="60000" selected>60 seconds</option>
+          <option value="120000">2 minutes</option>
+          <option value="300000">5 minutes</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="send-btn">Encrypt &amp; Send →</button>
     </div>
+    <div class="error-msg" id="error-msg"></div>
   </div>
 
-  <script>
-    // ── Crypto helpers ────────────────────────────────────────────────────────
+  <div class="result-card" id="result-card">
+    <div class="section-label">// two-channel transfer — share separately</div>
 
-    async function generateKey() {
-      return crypto.subtle.generateKey(
-        { name: 'AES-GCM', length: 256 },
-        true,
-        ['encrypt', 'decrypt']
-      );
-    }
+    <div class="channel-grid">
+      <div class="channel-block">
+        <div class="channel-label">Channel A — Link</div>
+        <div class="channel-value" id="link-display"></div>
+        <button class="btn-copy-small" id="copy-link-btn">Copy link</button>
+      </div>
+      <div class="channel-block">
+        <div class="channel-label">Channel B — Passphrase</div>
+        <div class="channel-value passphrase" id="passphrase-display"></div>
+        <button class="btn-copy-small" id="copy-pass-btn">Copy passphrase</button>
+      </div>
+    </div>
 
-    async function exportKey(key) {
-      const raw = await crypto.subtle.exportKey('raw', key);
-      return btoa(String.fromCharCode(...new Uint8Array(raw)));
-    }
+    <div class="qr-section">
+      <button class="qr-toggle" id="qr-toggle">▼ Show QR Code</button>
+      <div class="qr-panel" id="qr-panel">
+        <div class="qr-tabs">
+          <div class="qr-tab active" id="tab-combined" data-mode="combined">Combined (link + passphrase)</div>
+          <div class="qr-tab" id="tab-link" data-mode="link">Link only</div>
+        </div>
+        <div class="qr-wrapper">
+          <div id="qrcode"></div>
+          <div class="qr-note" id="qr-note">Scan to open link with passphrase pre-filled. Secret auto-decrypts on the receiver page.</div>
+        </div>
+      </div>
+    </div>
 
-    async function importKey(b64) {
-      const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['decrypt']);
-    }
+    <div class="timer-bar-wrap">
+      <div class="timer-bar" id="timer-bar"></div>
+    </div>
+    <div class="timer-text">Self-destructs in <span id="countdown">—</span></div>
+  </div>
 
-    async function encryptText(plaintext, key) {
-      const iv = crypto.getRandomValues(new Uint8Array(12));
-      const encoded = new TextEncoder().encode(plaintext);
-      const cipherbuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, encoded);
-      return {
-        ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipherbuf))),
-        iv: btoa(String.fromCharCode(...iv))
-      };
-    }
+  <div class="security-note">
+    <span class="dot"></span><strong>Two-channel security</strong> — share the link and passphrase via different channels.<br>
+    <span class="dot"></span><strong>Zero-knowledge</strong> — server stores only ciphertext. Passphrase never transmitted.<br>
+    <span class="dot"></span><strong>One-time read</strong> — secret deleted immediately on first retrieval.
+  </div>
+</div>
 
-    // ── UI ────────────────────────────────────────────────────────────────────
+<script>
+// ── Wordlist (100 words for 3-word passphrase = 1M combinations) ─────────────
+const WORDS = [
+  'amber','arctic','atlas','azure','badge','beacon','birch','blaze','bolt','bridge',
+  'brook','cabin','cedar','cipher','citrus','cliff','cloud','cobra','comet','coral',
+  'crane','creek','crest','crimson','delta','drift','dusk','eagle','ember','falcon',
+  'fern','ferry','field','flint','flux','forge','frost','gale','ghost','glacier',
+  'glyph','grove','haven','hawk','hazel','helix','holly','hydra','indigo','inlet',
+  'iris','ivory','jasper','juniper','kelp','kite','lance','latch','lava','ledge',
+  'lemon','lotus','lunar','lynx','maple','marsh','mast','mesa','mist','mocha',
+  'mosaic','moss','mystic','nectar','nexus','nimbus','noble','north','oak','obsidian',
+  'ocean','olive','onyx','orbit','osprey','oxide','ozone','pact','pearl','petal',
+  'pine','pixel','plasma','plinth','polar','prism','pulse','quartz','raven','reef',
+];
 
-    const sendBtn = document.getElementById('send-btn');
-    const input = document.getElementById('secret-input');
-    const resultCard = document.getElementById('result-card');
-    const linkDisplay = document.getElementById('link-display');
-    const copyLinkBtn = document.getElementById('copy-link-btn');
-    const errorMsg = document.getElementById('error-msg');
-    const qrDiv = document.getElementById('qrcode');
-    const timerBar = document.getElementById('timer-bar');
-    const countdownEl = document.getElementById('countdown');
+function generatePassphrase() {
+  const arr = new Uint32Array(3);
+  crypto.getRandomValues(arr);
+  return Array.from(arr).map(n => WORDS[n % WORDS.length]).join('-');
+}
 
-    let countdownInterval = null;
+// ── PBKDF2 key derivation from passphrase ────────────────────────────────────
+async function deriveKey(passphrase, saltB64) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']
+  );
+  const salt = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['encrypt', 'decrypt']
+  );
+}
 
-    function showError(msg) {
-      errorMsg.textContent = msg;
-      errorMsg.classList.add('visible');
-    }
+async function encryptText(plaintext, passphrase) {
+  const saltBytes = crypto.getRandomValues(new Uint8Array(16));
+  const ivBytes   = crypto.getRandomValues(new Uint8Array(12));
+  const salt = btoa(String.fromCharCode(...saltBytes));
+  const iv   = btoa(String.fromCharCode(...ivBytes));
 
-    function clearError() {
-      errorMsg.classList.remove('visible');
-    }
+  const key = await deriveKey(passphrase, salt);
+  const encoded = new TextEncoder().encode(plaintext);
+  const cipherbuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: ivBytes }, key, encoded);
 
-    sendBtn.addEventListener('click', async () => {
-      const text = input.value.trim();
-      if (!text) { showError('Please enter a secret to send.'); return; }
-      if (text.length > 8000) { showError('Secret is too long (max ~8000 chars).'); return; }
+  return {
+    ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipherbuf))),
+    salt,
+    iv
+  };
+}
 
-      clearError();
-      sendBtn.disabled = true;
-      sendBtn.textContent = 'Encrypting…';
+// ── UI refs ───────────────────────────────────────────────────────────────────
+const sendBtn        = document.getElementById('send-btn');
+const pasteBtn       = document.getElementById('paste-btn');
+const input          = document.getElementById('secret-input');
+const resultCard     = document.getElementById('result-card');
+const linkDisplay    = document.getElementById('link-display');
+const passphraseDisp = document.getElementById('passphrase-display');
+const copyLinkBtn    = document.getElementById('copy-link-btn');
+const copyPassBtn    = document.getElementById('copy-pass-btn');
+const errorMsg       = document.getElementById('error-msg');
+const qrDiv          = document.getElementById('qrcode');
+const timerBar       = document.getElementById('timer-bar');
+const countdownEl    = document.getElementById('countdown');
+const qrToggle       = document.getElementById('qr-toggle');
+const qrPanel        = document.getElementById('qr-panel');
+const qrNote         = document.getElementById('qr-note');
 
-      try {
-        const key = await generateKey();
-        const keyB64 = await exportKey(key);
-        const { ciphertext, iv } = await encryptText(text, key);
-        const expiryMs = parseInt(document.getElementById('expiry-select').value);
+let countdownInterval = null;
+let currentLinkUrl   = '';
+let currentCombinedUrl = '';
 
-        const res = await fetch('/send', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ciphertext, iv, salt: 'v1', expiry: expiryMs })
-        });
+function showError(msg) { errorMsg.textContent = msg; errorMsg.classList.add('visible'); }
+function clearError()   { errorMsg.classList.remove('visible'); }
 
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Server error');
+function copyText(text, btn, label) {
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = '✓ Copied';
+    setTimeout(() => { btn.textContent = label; }, 2000);
+  }).catch(() => { btn.textContent = 'Copy manually'; });
+}
 
-        const { id, expires_in } = data;
-        const origin = window.location.origin;
-        const fullUrl = `${origin}/get/${id}#${keyB64}`;
+// ── Paste from clipboard ──────────────────────────────────────────────────────
+pasteBtn.addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) { input.value = text; input.focus(); clearError(); }
+    else showError('Clipboard is empty.');
+  } catch {
+    showError('Clipboard access denied — paste manually (Ctrl+V).');
+  }
+});
 
-        linkDisplay.textContent = fullUrl;
-        resultCard.classList.add('visible');
-        input.value = '';
+// ── QR toggle & tabs ──────────────────────────────────────────────────────────
+qrToggle.addEventListener('click', () => {
+  const open = qrPanel.classList.toggle('open');
+  qrToggle.textContent = open ? '▲ Hide QR Code' : '▼ Show QR Code';
+});
 
-        // QR code
-        qrDiv.innerHTML = '';
-        new QRCode(qrDiv, {
-          text: fullUrl,
-          width: 160,
-          height: 160,
-          colorDark: '#000000',
-          colorLight: '#ffffff',
-          correctLevel: QRCode.CorrectLevel.M
-        });
+let qrMode = 'combined';
+document.querySelectorAll('.qr-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.qr-tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    qrMode = tab.dataset.mode;
+    renderQR();
+  });
+});
 
-        // Copy link button
-        copyLinkBtn.onclick = () => {
-          navigator.clipboard.writeText(fullUrl).then(() => {
-            copyLinkBtn.textContent = '✓ Copied';
-            setTimeout(() => { copyLinkBtn.textContent = 'Copy link'; }, 2000);
-          });
-        };
+function renderQR() {
+  if (!currentLinkUrl) return;
+  const url = qrMode === 'combined' ? currentCombinedUrl : currentLinkUrl;
+  qrDiv.innerHTML = '';
+  new QRCode(qrDiv, {
+    text: url, width: 160, height: 160,
+    colorDark: '#000000', colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M
+  });
+  qrNote.textContent = qrMode === 'combined'
+    ? 'Scan to open link with passphrase pre-filled. Secret auto-decrypts instantly.'
+    : 'Scan for link only. Receiver must enter passphrase manually.';
+}
 
-        linkDisplay.onclick = () => copyLinkBtn.click();
+// ── Send ──────────────────────────────────────────────────────────────────────
+sendBtn.addEventListener('click', async () => {
+  const text = input.value.trim();
+  if (!text) { showError('Please enter a secret to send.'); return; }
+  if (text.length > 8000) { showError('Secret is too long (max ~8000 chars).'); return; }
 
-        // Countdown
-        if (countdownInterval) clearInterval(countdownInterval);
-        const expiresAt = Date.now() + expires_in;
-        timerBar.style.transition = `width ${expires_in}ms linear`;
+  clearError();
+  sendBtn.disabled = true;
+  sendBtn.textContent = 'Encrypting…';
 
-        // Trigger reflow to restart animation
-        void timerBar.offsetWidth;
-        timerBar.style.width = '0%';
+  try {
+    const passphrase = generatePassphrase();
+    const { ciphertext, salt, iv } = await encryptText(text, passphrase);
+    const expiryMs = parseInt(document.getElementById('expiry-select').value);
 
-        countdownInterval = setInterval(() => {
-          const remaining = Math.max(0, expiresAt - Date.now());
-          const secs = Math.ceil(remaining / 1000);
-          countdownEl.textContent = `${secs}s`;
-          if (remaining <= 0) {
-            clearInterval(countdownInterval);
-            countdownEl.textContent = 'expired';
-            resultCard.style.borderColor = 'var(--danger)';
-          }
-        }, 250);
-
-      } catch (err) {
-        showError(err.message || 'Failed to send secret.');
-      } finally {
-        sendBtn.disabled = false;
-        sendBtn.textContent = 'Encrypt & Send →';
-      }
+    const res = await fetch('/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ciphertext, iv, salt, expiry: expiryMs })
     });
-  </script>
+
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+
+    const { id, expires_in } = data;
+    const origin = window.location.origin;
+
+    currentLinkUrl     = `${origin}/${id}`;
+    currentCombinedUrl = `${origin}/${id}#${encodeURIComponent(passphrase)}`;
+
+    // Update UI
+    linkDisplay.textContent     = currentLinkUrl;
+    passphraseDisp.textContent  = passphrase;
+    resultCard.classList.add('visible');
+    input.value = '';
+
+    copyLinkBtn.onclick = () => copyText(currentLinkUrl, copyLinkBtn, 'Copy link');
+    copyPassBtn.onclick = () => copyText(passphrase, copyPassBtn, 'Copy passphrase');
+
+    // Render QR in current mode
+    renderQR();
+
+    // Countdown
+    if (countdownInterval) clearInterval(countdownInterval);
+    const expiresAt = Date.now() + expires_in;
+    timerBar.style.transition = `width ${expires_in}ms linear`;
+    void timerBar.offsetWidth;
+    timerBar.style.width = '0%';
+
+    countdownInterval = setInterval(() => {
+      const remaining = Math.max(0, expiresAt - Date.now());
+      const secs = Math.ceil(remaining / 1000);
+      countdownEl.textContent = `${secs}s`;
+      if (remaining <= 0) {
+        clearInterval(countdownInterval);
+        countdownEl.textContent = 'expired';
+        resultCard.style.borderColor = 'var(--danger)';
+      }
+    }, 250);
+
+  } catch (err) {
+    showError(err.message || 'Failed to send secret.');
+  } finally {
+    sendBtn.disabled = false;
+    sendBtn.textContent = 'Encrypt & Send →';
+  }
+});
+</script>
 </body>
 </html>

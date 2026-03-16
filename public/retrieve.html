@@ -8,436 +8,369 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     :root {
-      --bg: #0a0a0b;
-      --surface: #111113;
-      --border: #222226;
-      --text: #e8e8ec;
-      --muted: #555560;
-      --accent: #00d4aa;
-      --accent-dim: rgba(0, 212, 170, 0.12);
-      --accent-glow: rgba(0, 212, 170, 0.3);
-      --danger: #ff4757;
-      --warning: #ffa502;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
+      --bg: #0a0a0b; --surface: #111113; --border: #222226; --text: #e8e8ec;
+      --muted: #555560; --accent: #00d4aa; --accent-dim: rgba(0,212,170,0.12);
+      --accent-glow: rgba(0,212,170,0.3); --danger: #ff4757; --warning: #ffa502;
+      --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
     }
-
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-    }
-
-    body {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      padding: 24px;
-    }
-
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); }
+    body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
     body::before {
-      content: '';
-      position: fixed;
-      inset: 0;
-      background-image:
-        linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+      content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background-image: linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
       background-size: 48px 48px;
-      pointer-events: none;
-      z-index: 0;
     }
+    .container { position: relative; z-index: 1; width: 100%; max-width: 460px; text-align: center; }
 
-    .container {
-      position: relative;
-      z-index: 1;
-      width: 100%;
-      max-width: 480px;
-      text-align: center;
-    }
+    .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 40px; text-decoration: none; }
+    .logo-icon { width: 26px; height: 26px; background: var(--accent); clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); }
+    .logo-text { font-family: var(--mono); font-size: 16px; font-weight: 600; color: var(--accent); }
 
-    .logo {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 40px;
-      text-decoration: none;
-    }
-
-    .logo-icon {
-      width: 28px;
-      height: 28px;
-      background: var(--accent);
-      clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    }
-
-    .logo-text {
-      font-family: var(--mono);
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--accent);
-    }
-
-    /* States */
     .state { display: none; }
     .state.active { display: block; }
 
-    /* Loading state */
-    .spinner {
-      width: 48px;
-      height: 48px;
-      border: 2px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      margin: 0 auto 24px;
-      animation: spin 0.8s linear infinite;
-    }
-
+    /* Loading */
+    .spinner { width: 44px; height: 44px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; margin: 0 auto 20px; animation: spin 0.8s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
+    .state-title { font-family: var(--mono); font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
 
-    .state-title {
-      font-family: var(--mono);
-      font-size: 13px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
+    /* Passphrase input state */
+    .pass-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 28px 32px; text-align: left; position: relative; overflow: hidden; }
+    .pass-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); opacity: 0.5; }
+    .pass-title { font-family: var(--mono); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    .pass-input-wrap { position: relative; margin-bottom: 12px; }
+    .pass-input {
+      width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 3px;
+      color: var(--text); font-family: var(--mono); font-size: 15px; padding: 13px 16px;
+      letter-spacing: 0.03em; outline: none; transition: border-color 0.2s;
     }
+    .pass-input:focus { border-color: var(--accent); box-shadow: inset 0 0 20px rgba(0,212,170,0.02); }
+    .pass-input::placeholder { color: var(--muted); font-size: 13px; }
+    .pass-hint { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-bottom: 16px; line-height: 1.6; }
+    .btn-decrypt { width: 100%; background: var(--accent); color: #000; font-family: var(--mono); font-size: 13px; font-weight: 600; padding: 11px; border: none; border-radius: 3px; cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em; }
+    .btn-decrypt:hover { background: #00f0c0; box-shadow: 0 0 20px var(--accent-glow); }
+    .btn-decrypt:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pass-error { display: none; font-family: var(--mono); font-size: 11px; color: var(--danger); margin-top: 10px; }
+    .pass-error.visible { display: block; }
 
     /* Success state */
-    .success-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: var(--accent-dim);
-      border: 1px solid var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 28px;
-      font-size: 28px;
-      box-shadow: 0 0 40px rgba(0,212,170,0.15);
-      animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    .success-icon { width: 60px; height: 60px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 26px; box-shadow: 0 0 40px rgba(0,212,170,0.15); animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1); }
+    @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    .success-title { font-family: var(--mono); font-size: 15px; color: var(--accent); margin-bottom: 8px; letter-spacing: 0.04em; }
+    .success-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; margin-bottom: 24px; }
+
+    /* Action buttons */
+    .action-grid { display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+    .btn-action {
+      background: var(--surface); border: 1px solid var(--border); color: var(--text);
+      font-family: var(--mono); font-size: 12px; padding: 10px 16px; border-radius: 3px;
+      cursor: pointer; transition: all 0.15s; text-align: left; display: flex; align-items: center; gap: 10px;
     }
+    .btn-action:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-action .icon { font-size: 15px; flex-shrink: 0; }
+    .btn-action.danger:hover { border-color: var(--danger); color: var(--danger); }
+    .btn-feedback { font-family: var(--mono); font-size: 10px; color: var(--muted); min-height: 16px; margin-bottom: 4px; transition: color 0.2s; }
+    .btn-feedback.ok { color: var(--accent); }
+    .btn-feedback.cleared { color: var(--warning); }
 
-    @keyframes popIn {
-      from { transform: scale(0.5); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
+    /* Reveal panel */
+    .reveal-panel { display: none; margin-bottom: 16px; }
+    .reveal-panel.open { display: block; animation: fadeIn 0.2s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .secret-field {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 3px;
+      padding: 14px 16px; font-family: var(--mono); font-size: 13px; color: var(--text);
+      word-break: break-all; text-align: left; filter: blur(8px); cursor: pointer;
+      transition: filter 0.25s; user-select: none; line-height: 1.6;
     }
+    .secret-field.unblurred { filter: none; cursor: default; user-select: text; }
+    .blur-hint { font-family: var(--mono); font-size: 10px; color: var(--muted); margin-top: 5px; text-align: left; }
 
-    .success-title {
-      font-family: var(--mono);
-      font-size: 15px;
-      color: var(--accent);
-      margin-bottom: 12px;
-      letter-spacing: 0.05em;
-    }
+    .destruct-note { font-family: var(--mono); font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--danger); opacity: 0.6; animation: pulse 2.5s ease infinite; margin-bottom: 20px; }
+    @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 0.8; } }
 
-    .success-sub {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.8;
-    }
-
-    .destruct-note {
-      margin-top: 32px;
-      font-family: var(--mono);
-      font-size: 10px;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--danger);
-      opacity: 0.7;
-      animation: pulse 2s ease infinite;
-    }
-
-    @keyframes pulse {
-      0%, 100% { opacity: 0.5; }
-      50% { opacity: 1; }
-    }
-
-    /* Show secret option */
-    .reveal-wrap {
-      margin-top: 20px;
-    }
-
-    .btn-reveal {
-      background: transparent;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-family: var(--mono);
-      font-size: 11px;
-      padding: 7px 16px;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .btn-reveal:hover { border-color: var(--muted); color: var(--text); }
-
-    .revealed-text {
-      margin-top: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 14px;
-      font-family: var(--mono);
-      font-size: 13px;
-      color: var(--text);
-      word-break: break-all;
-      text-align: left;
-      filter: blur(6px);
-      transition: filter 0.3s;
-      cursor: pointer;
-      user-select: none;
-    }
-
-    .revealed-text.unblurred { filter: none; cursor: default; }
-
-    .blur-hint {
-      font-family: var(--mono);
-      font-size: 10px;
-      color: var(--muted);
-      margin-top: 6px;
-    }
+    .btn-new { display: inline-block; font-family: var(--mono); font-size: 12px; color: var(--accent); text-decoration: none; border: 1px solid var(--accent); padding: 8px 20px; border-radius: 3px; transition: all 0.15s; }
+    .btn-new:hover { background: var(--accent-dim); box-shadow: 0 0 16px var(--accent-glow); }
 
     /* Error state */
-    .error-icon {
-      width: 64px;
-      height: 64px;
-      border-radius: 50%;
-      background: rgba(255,71,87,0.08);
-      border: 1px solid var(--danger);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin: 0 auto 28px;
-      font-size: 28px;
-    }
+    .error-icon { width: 60px; height: 60px; border-radius: 50%; background: rgba(255,71,87,0.08); border: 1px solid var(--danger); display: flex; align-items: center; justify-content: center; margin: 0 auto 24px; font-size: 26px; }
+    .error-title { font-family: var(--mono); font-size: 14px; color: var(--danger); margin-bottom: 10px; }
+    .error-sub { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; margin-bottom: 24px; }
 
-    .error-title {
-      font-family: var(--mono);
-      font-size: 14px;
-      color: var(--danger);
-      margin-bottom: 12px;
-    }
-
-    .error-sub {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--muted);
-      line-height: 1.8;
-    }
-
-    .btn-new {
-      display: inline-block;
-      margin-top: 28px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--accent);
-      text-decoration: none;
-      border: 1px solid var(--accent);
-      padding: 9px 20px;
-      border-radius: 3px;
-      transition: all 0.15s;
-    }
-
-    .btn-new:hover {
-      background: var(--accent-dim);
-      box-shadow: 0 0 16px var(--accent-glow);
-    }
-
-    /* Progress ring */
-    .progress-ring {
-      position: relative;
-      width: 64px;
-      height: 64px;
-      margin: 0 auto 28px;
-    }
-
-    .progress-ring svg {
-      transform: rotate(-90deg);
-    }
-
-    .progress-ring-text {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-family: var(--mono);
-      font-size: 18px;
-      color: var(--accent);
-    }
+    /* Manual fallback */
+    .manual-field { background: var(--surface); border: 1px solid var(--border); border-radius: 3px; padding: 14px 16px; font-family: var(--mono); font-size: 13px; color: var(--text); word-break: break-all; text-align: left; margin: 16px 0; line-height: 1.6; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <a href="/" class="logo">
-      <div class="logo-icon"></div>
-      <span class="logo-text">ClipVault</span>
-    </a>
+<div class="container">
+  <a href="/" class="logo">
+    <div class="logo-icon"></div>
+    <span class="logo-text">ClipVault</span>
+  </a>
 
-    <!-- Loading -->
-    <div class="state active" id="state-loading">
-      <div class="spinner"></div>
-      <div class="state-title">Retrieving &amp; decrypting…</div>
-    </div>
+  <!-- Loading -->
+  <div class="state active" id="state-loading">
+    <div class="spinner"></div>
+    <div class="state-title">Fetching encrypted payload…</div>
+  </div>
 
-    <!-- No key -->
-    <div class="state" id="state-nokey">
-      <div class="error-icon">⚠</div>
-      <div class="error-title">Missing decryption key</div>
-      <div class="error-sub">
-        This URL is incomplete.<br>
-        The decryption key should be in the URL fragment (#).<br><br>
-        Make sure you copied the full link.
+  <!-- Passphrase entry -->
+  <div class="state" id="state-passphrase">
+    <div class="pass-card">
+      <div class="pass-title">// enter passphrase to decrypt</div>
+      <div class="pass-hint">
+        You received a link and a separate passphrase.<br>
+        Enter the passphrase below to retrieve your secret.
       </div>
-      <a class="btn-new" href="/">Send a new secret</a>
-    </div>
-
-    <!-- Success -->
-    <div class="state" id="state-success">
-      <div class="success-icon">✓</div>
-      <div class="success-title">Secret copied to clipboard</div>
-      <div class="success-sub">
-        The encrypted payload has been permanently deleted.<br>
-        This link will never work again.
+      <div class="pass-input-wrap">
+        <input type="text" class="pass-input" id="pass-input"
+          placeholder="word-word-word"
+          spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off" />
       </div>
-
-      <div class="reveal-wrap">
-        <button class="btn-reveal" id="reveal-btn">Show secret</button>
-        <div id="revealed-text" class="revealed-text" style="display:none"></div>
-        <div class="blur-hint" id="blur-hint" style="display:none">Click to toggle visibility</div>
-      </div>
-
-      <div class="destruct-note">⬡ Server entry permanently deleted ⬡</div>
-      <br><br>
-      <a class="btn-new" href="/">Send another secret</a>
-    </div>
-
-    <!-- No clipboard access -->
-    <div class="state" id="state-nocopy">
-      <div class="success-icon">✓</div>
-      <div class="success-title">Secret retrieved &amp; decrypted</div>
-      <div class="success-sub">
-        Clipboard access was denied. Here is your secret:<br>
-        (Copy it manually, then close this tab.)
-      </div>
-      <div id="manual-text" class="revealed-text" style="margin-top:16px; filter:none; cursor:default;"></div>
-      <div class="destruct-note">⬡ Server entry permanently deleted ⬡</div>
-    </div>
-
-    <!-- Error -->
-    <div class="state" id="state-error">
-      <div class="error-icon">✕</div>
-      <div class="error-title" id="error-title">Secret not found</div>
-      <div class="error-sub" id="error-sub">
-        This secret has already been retrieved or has expired.<br>
-        Secrets are one-time use only.
-      </div>
-      <a class="btn-new" href="/">Send a new secret</a>
+      <button class="btn-decrypt" id="decrypt-btn">Decrypt Secret →</button>
+      <div class="pass-error" id="pass-error"></div>
     </div>
   </div>
 
-  <script>
-    function setState(id) {
-      document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
+  <!-- Success -->
+  <div class="state" id="state-success">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Secret copied to clipboard</div>
+    <div class="success-sub">
+      Payload permanently deleted from server.<br>
+      This link will never work again.
+    </div>
+
+    <div class="action-grid">
+      <div class="btn-feedback" id="copy-feedback"></div>
+      <button class="btn-action" id="copy-again-btn">
+        <span class="icon">⧉</span> Copy Secret Again
+      </button>
+      <button class="btn-action" id="reveal-btn">
+        <span class="icon">◎</span> Reveal Secret
+      </button>
+      <button class="btn-action danger" id="clear-btn">
+        <span class="icon">⊗</span> Clear Clipboard Now
+      </button>
+    </div>
+
+    <div class="reveal-panel" id="reveal-panel">
+      <div class="secret-field" id="secret-field"></div>
+      <div class="blur-hint">Click to toggle visibility</div>
+    </div>
+
+    <div class="destruct-note">⬡ server entry permanently deleted ⬡</div>
+    <a class="btn-new" href="/">Send another secret</a>
+  </div>
+
+  <!-- No clipboard access — manual fallback -->
+  <div class="state" id="state-nocopy">
+    <div class="success-icon">✓</div>
+    <div class="success-title">Secret decrypted</div>
+    <div class="success-sub">Clipboard access was denied. Copy manually:</div>
+    <div class="manual-field" id="manual-field"></div>
+    <div class="destruct-note">⬡ server entry permanently deleted ⬡</div>
+    <a class="btn-new" href="/">Send another secret</a>
+  </div>
+
+  <!-- Error -->
+  <div class="state" id="state-error">
+    <div class="error-icon">✕</div>
+    <div class="error-title" id="error-title">Secret not found</div>
+    <div class="error-sub" id="error-sub">This secret has already been retrieved or has expired.</div>
+    <a class="btn-new" href="/">Send a new secret</a>
+  </div>
+</div>
+
+<script>
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function setState(id) {
+  document.querySelectorAll('.state').forEach(el => el.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showFetchError(title, sub) {
+  document.getElementById('error-title').textContent = title;
+  document.getElementById('error-sub').textContent   = sub;
+  setState('state-error');
+}
+
+async function deriveKey(passphrase, saltB64) {
+  const enc = new TextEncoder();
+  const keyMaterial = await crypto.subtle.importKey(
+    'raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']
+  );
+  const salt = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
+    keyMaterial,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    ['decrypt']
+  );
+}
+
+async function decryptPayload(payload, passphrase) {
+  const key = await deriveKey(passphrase, payload.salt);
+  const iv  = Uint8Array.from(atob(payload.iv), c => c.charCodeAt(0));
+  const ct  = Uint8Array.from(atob(payload.ciphertext), c => c.charCodeAt(0));
+  const buf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ct);
+  return new TextDecoder().decode(buf);
+}
+
+// ── Extract ID from URL path ──────────────────────────────────────────────────
+const pathParts = window.location.pathname.split('/').filter(Boolean);
+const id        = pathParts[pathParts.length - 1];
+const fragment  = window.location.hash.slice(1);
+const passphraseFromURL = fragment ? decodeURIComponent(fragment) : null;
+
+// Clear fragment from URL bar immediately (passphrase should not linger)
+if (fragment) history.replaceState(null, '', window.location.pathname);
+
+let cachedPayload  = null;
+let decryptedSecret = null;
+
+// ── Fetch encrypted payload ───────────────────────────────────────────────────
+async function fetchPayload() {
+  if (!id || !/^\d{6}$/.test(id)) {
+    showFetchError('Invalid link', 'This URL does not contain a valid secret ID.');
+    return;
+  }
+
+  try {
+    const res = await fetch(`/${id}`, { headers: { 'Accept': 'application/json' } });
+    const data = await res.json();
+
+    if (!res.ok) {
+      const title = res.status === 410 ? 'Secret has expired' : 'Secret not found';
+      showFetchError(title, data.error || 'This secret no longer exists.');
+      return;
     }
 
-    async function importKey(b64) {
-      const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-      return crypto.subtle.importKey('raw', raw, { name: 'AES-GCM' }, false, ['decrypt']);
+    cachedPayload = data;
+
+    if (passphraseFromURL) {
+      // QR scan path — passphrase in fragment, auto-decrypt
+      await attemptDecrypt(passphraseFromURL);
+    } else {
+      // Manual path — show passphrase entry form
+      setState('state-passphrase');
+      document.getElementById('pass-input').focus();
     }
 
-    async function decryptText(ciphertextB64, ivB64, key) {
-      const cipherdata = Uint8Array.from(atob(ciphertextB64), c => c.charCodeAt(0));
-      const iv = Uint8Array.from(atob(ivB64), c => c.charCodeAt(0));
-      const plainbuf = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, cipherdata);
-      return new TextDecoder().decode(plainbuf);
+  } catch {
+    showFetchError('Network error', 'Could not reach the server. Are you on the right network?');
+  }
+}
+
+// ── Decrypt + show result ─────────────────────────────────────────────────────
+async function attemptDecrypt(passphrase) {
+  try {
+    const plaintext = await decryptPayload(cachedPayload, passphrase.trim());
+    decryptedSecret = plaintext;
+    await showSuccess(plaintext);
+  } catch {
+    return false;
+  }
+  return true;
+}
+
+async function showSuccess(plaintext) {
+  let copied = false;
+  try {
+    await navigator.clipboard.writeText(plaintext);
+    copied = true;
+  } catch {}
+
+  if (copied) {
+    setState('state-success');
+    setupSuccessActions(plaintext);
+  } else {
+    setState('state-nocopy');
+    document.getElementById('manual-field').textContent = plaintext;
+  }
+}
+
+function setupSuccessActions(plaintext) {
+  const feedback     = document.getElementById('copy-feedback');
+  const copyAgainBtn = document.getElementById('copy-again-btn');
+  const revealBtn    = document.getElementById('reveal-btn');
+  const clearBtn     = document.getElementById('clear-btn');
+  const revealPanel  = document.getElementById('reveal-panel');
+  const secretField  = document.getElementById('secret-field');
+
+  function setFeedback(msg, cls) {
+    feedback.textContent = msg;
+    feedback.className   = 'btn-feedback ' + cls;
+    setTimeout(() => { feedback.textContent = ''; feedback.className = 'btn-feedback'; }, 2500);
+  }
+
+  copyAgainBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(plaintext);
+      setFeedback('✓ Copied to clipboard', 'ok');
+    } catch {
+      setFeedback('Clipboard denied — use Reveal instead', '');
     }
+  });
 
-    async function main() {
-      // Extract ID from path
-      const pathParts = window.location.pathname.split('/');
-      const id = pathParts[pathParts.length - 1];
+  let revealed = false;
+  revealBtn.addEventListener('click', () => {
+    revealed = !revealed;
+    revealPanel.classList.toggle('open', revealed);
+    secretField.textContent = plaintext;
+    revealBtn.querySelector('.icon').textContent = revealed ? '◉' : '◎';
+    if (!revealed) secretField.classList.remove('unblurred');
+  });
 
-      // Extract key from fragment (never sent to server)
-      const keyB64 = window.location.hash.slice(1);
+  secretField.addEventListener('click', () => {
+    secretField.classList.toggle('unblurred');
+  });
 
-      if (!keyB64) {
-        setState('state-nokey');
-        return;
-      }
-
-      try {
-        // Fetch ciphertext from server (one-time — server deletes immediately)
-        const res = await fetch(`/get/${id}`, {
-          headers: { 'Accept': 'application/json' }
-        });
-        const data = await res.json();
-
-        if (!res.ok) {
-          setState('state-error');
-          document.getElementById('error-title').textContent =
-            res.status === 410 ? 'Secret has expired' : 'Secret not found';
-          document.getElementById('error-sub').textContent =
-            data.error || 'This secret no longer exists.';
-          return;
-        }
-
-        // Decrypt client-side
-        const key = await importKey(keyB64);
-        const plaintext = await decryptText(data.ciphertext, data.iv, key);
-
-        // Clear URL fragment immediately so key isn't in history
-        history.replaceState(null, '', window.location.pathname);
-
-        // Try clipboard copy
-        let copied = false;
-        try {
-          await navigator.clipboard.writeText(plaintext);
-          copied = true;
-        } catch (_) {}
-
-        if (copied) {
-          setState('state-success');
-
-          // Reveal button
-          const revealBtn = document.getElementById('reveal-btn');
-          const revealedDiv = document.getElementById('revealed-text');
-          const blurHint = document.getElementById('blur-hint');
-
-          revealBtn.addEventListener('click', () => {
-            revealedDiv.textContent = plaintext;
-            revealedDiv.style.display = 'block';
-            blurHint.style.display = 'block';
-            revealBtn.style.display = 'none';
-
-            revealedDiv.addEventListener('click', () => {
-              revealedDiv.classList.toggle('unblurred');
-            });
-          });
-        } else {
-          // Show manually if clipboard denied
-          setState('state-nocopy');
-          document.getElementById('manual-text').textContent = plaintext;
-        }
-
-      } catch (err) {
-        setState('state-error');
-        document.getElementById('error-title').textContent = 'Decryption failed';
-        document.getElementById('error-sub').textContent =
-          'Could not decrypt this secret. The key or ciphertext may be corrupted.';
-      }
+  clearBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText('');
+      setFeedback('✓ Clipboard cleared', 'cleared');
+    } catch {
+      setFeedback('Could not access clipboard', '');
     }
+  });
+}
 
-    main();
-  </script>
+// ── Passphrase form submit ────────────────────────────────────────────────────
+document.getElementById('decrypt-btn').addEventListener('click', async () => {
+  const passInput = document.getElementById('pass-input');
+  const passError = document.getElementById('pass-error');
+  const passphrase = passInput.value.trim();
+
+  if (!passphrase) {
+    passError.textContent = 'Please enter the passphrase.';
+    passError.classList.add('visible');
+    return;
+  }
+
+  passError.classList.remove('visible');
+  const btn = document.getElementById('decrypt-btn');
+  btn.disabled = true;
+  btn.textContent = 'Decrypting…';
+
+  const ok = await attemptDecrypt(passphrase);
+
+  if (!ok) {
+    passError.textContent = 'Wrong passphrase or corrupted data. Check and try again.';
+    passError.classList.add('visible');
+    btn.disabled = false;
+    btn.textContent = 'Decrypt Secret →';
+  }
+});
+
+document.getElementById('pass-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('decrypt-btn').click();
+});
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+fetchPayload();
+</script>
 </body>
 </html>
