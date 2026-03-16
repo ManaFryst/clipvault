@@ -10,18 +10,10 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #0a0a0b;
-      --surface: #111113;
-      --border: #222226;
-      --text: #e8e8ec;
-      --muted: #555560;
-      --accent: #00d4aa;
-      --accent-dim: rgba(0,212,170,0.12);
-      --accent-glow: rgba(0,212,170,0.3);
-      --danger: #ff4757;
-      --warning: #ffa502;
-      --mono: 'IBM Plex Mono', monospace;
-      --sans: 'IBM Plex Sans', sans-serif;
+      --bg: #0a0a0b; --surface: #111113; --border: #222226; --text: #e8e8ec;
+      --muted: #555560; --accent: #00d4aa; --accent-dim: rgba(0,212,170,0.12);
+      --accent-glow: rgba(0,212,170,0.3); --danger: #ff4757;
+      --mono: 'IBM Plex Mono', monospace; --sans: 'IBM Plex Sans', sans-serif;
     }
     html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--sans); font-size: 15px; line-height: 1.6; }
     body { display: flex; flex-direction: column; align-items: center; padding: 48px 24px 80px; min-height: 100vh; }
@@ -32,8 +24,8 @@
     }
     .container { position: relative; z-index: 1; width: 100%; max-width: 580px; }
     header { margin-bottom: 40px; }
-    .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-    .logo-icon { width: 30px; height: 30px; background: var(--accent); clip-path: polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%); flex-shrink: 0; }
+    .logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 6px; text-decoration: none; }
+    .logo svg { color: var(--accent); width: 28px; height: 28px; flex-shrink: 0; }
     .logo-text { font-family: var(--mono); font-size: 18px; font-weight: 600; letter-spacing: -0.02em; color: var(--accent); }
     .tagline { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
 
@@ -46,7 +38,9 @@
       background: var(--bg); border: 1px solid var(--border); color: var(--muted);
       font-family: var(--mono); font-size: 11px; padding: 0 14px; border-radius: 3px;
       cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0;
+      display: inline-flex; align-items: center; gap: 6px;
     }
+    .btn-paste svg { width: 14px; height: 14px; flex-shrink: 0; }
     .btn-paste:hover { border-color: var(--accent); color: var(--accent); }
 
     textarea {
@@ -60,70 +54,57 @@
     .controls { display: flex; align-items: center; gap: 12px; margin-top: 14px; flex-wrap: wrap; }
     .expiry-row { display: flex; align-items: center; gap: 8px; flex: 1; }
     .expiry-row label { font-family: var(--mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
-    select {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 3px;
-      color: var(--text); font-family: var(--mono); font-size: 12px; padding: 6px 10px; cursor: pointer; outline: none;
-    }
+    select { background: var(--bg); border: 1px solid var(--border); border-radius: 3px; color: var(--text); font-family: var(--mono); font-size: 12px; padding: 6px 10px; cursor: pointer; outline: none; }
     select:focus { border-color: var(--accent); }
 
-    .btn { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.05em; padding: 10px 22px; border: none; border-radius: 3px; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
+    .btn { font-family: var(--mono); font-size: 13px; font-weight: 500; letter-spacing: 0.05em; padding: 10px 22px; border: none; border-radius: 3px; cursor: pointer; transition: all 0.15s; white-space: nowrap; display: inline-flex; align-items: center; gap: 7px; }
+    .btn svg { width: 15px; height: 15px; flex-shrink: 0; }
     .btn-primary { background: var(--accent); color: #000; }
     .btn-primary:hover { background: #00f0c0; box-shadow: 0 0 20px var(--accent-glow); }
     .btn-primary:active { transform: translateY(1px); }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
     .error-msg { display: none; font-family: var(--mono); font-size: 12px; color: var(--danger); margin-top: 10px; }
     .error-msg.visible { display: block; }
 
-    /* ── Result card ── */
-    .result-card {
-      display: none; background: var(--surface); border: 1px solid var(--accent);
-      border-radius: 4px; padding: 28px 32px; margin-bottom: 14px;
-      box-shadow: 0 0 40px rgba(0,212,170,0.07); position: relative; overflow: hidden;
-    }
+    /* Result card */
+    .result-card { display: none; background: var(--surface); border: 1px solid var(--accent); border-radius: 4px; padding: 28px 32px; margin-bottom: 14px; box-shadow: 0 0 40px rgba(0,212,170,0.07); position: relative; overflow: hidden; }
     .result-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: var(--accent); }
     .result-card.visible { display: block; animation: fadeIn 0.3s ease; }
-
     @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* channel blocks */
     .channel-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
     @media (max-width: 500px) { .channel-grid { grid-template-columns: 1fr; } }
-
     .channel-block { background: var(--bg); border: 1px solid var(--border); border-radius: 3px; padding: 14px 16px; }
-    .channel-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
-    .channel-value { font-family: var(--mono); font-size: 13px; color: var(--accent); word-break: break-all; line-height: 1.5; }
+    .channel-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 5px; }
+    .channel-label svg { width: 12px; height: 12px; }
+    .channel-value { font-family: var(--mono); font-size: 12px; color: var(--accent); word-break: break-all; line-height: 1.5; }
     .channel-value.passphrase { font-size: 15px; letter-spacing: 0.03em; color: #fff; }
     .btn-copy-small {
-      display: inline-block; margin-top: 8px; background: transparent; border: 1px solid var(--border);
-      color: var(--muted); font-family: var(--mono); font-size: 10px; padding: 4px 10px;
-      border-radius: 3px; cursor: pointer; transition: all 0.15s;
+      display: inline-flex; align-items: center; gap: 5px; margin-top: 8px;
+      background: transparent; border: 1px solid var(--border); color: var(--muted);
+      font-family: var(--mono); font-size: 10px; padding: 4px 10px; border-radius: 3px;
+      cursor: pointer; transition: all 0.15s;
     }
+    .btn-copy-small svg { width: 11px; height: 11px; }
     .btn-copy-small:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* QR section */
+    /* QR */
     .qr-section { margin-top: 20px; }
-    .qr-toggle {
-      background: transparent; border: 1px solid var(--border); color: var(--muted);
-      font-family: var(--mono); font-size: 11px; padding: 6px 14px; border-radius: 3px;
-      cursor: pointer; transition: all 0.15s; width: 100%;
-    }
+    .qr-toggle { background: transparent; border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 11px; padding: 7px 14px; border-radius: 3px; cursor: pointer; transition: all 0.15s; width: 100%; display: flex; align-items: center; justify-content: center; gap: 7px; }
+    .qr-toggle svg { width: 14px; height: 14px; transition: transform 0.2s; }
+    .qr-toggle.open svg.chevron { transform: rotate(180deg); }
     .qr-toggle:hover { border-color: var(--accent); color: var(--accent); }
     .qr-panel { display: none; margin-top: 16px; }
     .qr-panel.open { display: block; }
     .qr-tabs { display: flex; gap: 8px; margin-bottom: 14px; }
-    .qr-tab {
-      flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--muted);
-      font-family: var(--mono); font-size: 11px; padding: 6px; border-radius: 3px;
-      cursor: pointer; transition: all 0.15s; text-align: center;
-    }
+    .qr-tab { flex: 1; background: var(--bg); border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 11px; padding: 6px; border-radius: 3px; cursor: pointer; transition: all 0.15s; text-align: center; }
     .qr-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
     .qr-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
     .qr-note { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; max-width: 280px; line-height: 1.6; }
     #qrcode { padding: 12px; background: #fff; border-radius: 4px; display: inline-block; }
     #qrcode canvas, #qrcode img { display: block; }
 
-    /* timer */
+    /* Timer */
     .timer-bar-wrap { margin-top: 20px; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
     .timer-bar { height: 100%; background: var(--accent); width: 100%; transition: width linear; border-radius: 2px; }
     .timer-text { font-family: var(--mono); font-size: 11px; color: var(--muted); margin-top: 6px; text-align: right; }
@@ -131,23 +112,29 @@
 
     .security-note { font-family: var(--mono); font-size: 11px; color: var(--muted); line-height: 1.8; padding: 14px 20px; border-left: 2px solid var(--border); margin-top: 6px; }
     .security-note strong { color: var(--text); }
-    .dot { display: inline-block; width: 5px; height: 5px; border-radius: 50%; background: var(--accent); margin-right: 7px; vertical-align: middle; }
+    .security-row { display: flex; align-items: flex-start; gap: 8px; }
+    .security-row svg { width: 13px; height: 13px; flex-shrink: 0; margin-top: 4px; color: var(--accent); }
   </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <div class="logo">
-      <div class="logo-icon"></div>
+    <a href="/" class="logo">
+      <!-- HashHexagon icon -->
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 15.8V8.2a1.91 1.91 0 0 0-.944-1.645l-6.612-3.8a1.88 1.88 0 0 0-1.888 0l-6.612 3.8A1.9 1.9 0 0 0 3.5 8.2v7.602a1.91 1.91 0 0 0 .944 1.644l6.612 3.8a1.88 1.88 0 0 0 1.888 0l6.612-3.8A1.9 1.9 0 0 0 20.5 15.8M10.905 8l-1.437 8m4.937-8-1.437 8m3.314-5.75H7.718m8.564 3.5H7.718"/></svg>
       <span class="logo-text">ClipVault</span>
-    </div>
+    </a>
     <div class="tagline">two-channel · zero-knowledge · one-time</div>
   </header>
 
   <div class="card">
     <div class="section-label">// send secret</div>
     <div class="input-row">
-      <button class="btn-paste" id="paste-btn" title="Read from clipboard">⌘ Paste from Clipboard</button>
+      <button class="btn-paste" id="paste-btn">
+        <!-- Clipboard icon -->
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2H9z"/><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/></svg>
+        Paste from Clipboard
+      </button>
     </div>
     <textarea id="secret-input" placeholder="Paste your password or secret text here…" spellcheck="false" autocomplete="off" autocorrect="off" autocapitalize="off"></textarea>
     <div class="controls">
@@ -160,7 +147,11 @@
           <option value="300000">5 minutes</option>
         </select>
       </div>
-      <button class="btn btn-primary" id="send-btn">Encrypt &amp; Send →</button>
+      <button class="btn btn-primary" id="send-btn">
+        <!-- Send icon -->
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m14 10-3 3m9.288-9.969a.535.535 0 0 1 .68.681l-5.924 16.93a.535.535 0 0 1-.994.04l-3.219-7.242a.54.54 0 0 0-.271-.271l-7.242-3.22a.535.535 0 0 1 .04-.993z"/></svg>
+        Encrypt &amp; Send
+      </button>
     </div>
     <div class="error-msg" id="error-msg"></div>
   </div>
@@ -170,19 +161,40 @@
 
     <div class="channel-grid">
       <div class="channel-block">
-        <div class="channel-label">Channel A — Link</div>
+        <div class="channel-label">
+          <!-- Link icon -->
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m15.988 13 3.902-3.902c1.437-1.437 1.485-3.718.107-5.095-1.377-1.378-3.658-1.33-5.095.107L11 8.012m2 7.95-3.892 3.88c-1.432 1.43-3.64 1.615-5.082.107-1.442-1.507-1.326-3.639.107-5.068L8.025 11M9 15l6-6"/></svg>
+          Channel A — Link
+        </div>
         <div class="channel-value" id="link-display"></div>
-        <button class="btn-copy-small" id="copy-link-btn">Copy link</button>
+        <button class="btn-copy-small" id="copy-link-btn">
+          <!-- Copy icon -->
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20.829 12.861c.171-.413.171-.938.171-1.986s0-1.573-.171-1.986a2.25 2.25 0 0 0-1.218-1.218c-.413-.171-.938-.171-1.986-.171H11.1c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C7.5 9.209 7.5 9.839 7.5 11.1v6.525c0 1.048 0 1.573.171 1.986.229.551.667.99 1.218 1.218.413.171.938.171 1.986.171s1.573 0 1.986-.171m7.968-7.968a2.25 2.25 0 0 1-1.218 1.218c-.413.171-.938.171-1.986.171s-1.573 0-1.986.171a2.25 2.25 0 0 0-1.218 1.218c-.171.413-.171.938-.171 1.986s0 1.573-.171 1.986a2.25 2.25 0 0 1-1.218 1.218m7.968-7.968a11.68 11.68 0 0 1-7.75 7.9l-.218.068M16.5 7.5v-.9c0-1.26 0-1.89-.245-2.371a2.25 2.25 0 0 0-.983-.984C14.79 3 14.16 3 12.9 3H6.6c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C3 4.709 3 5.339 3 6.6v6.3c0 1.26 0 1.89.245 2.371.216.424.56.768.984.984.48.245 1.111.245 2.372.245H7.5"/></svg>
+          Copy link
+        </button>
       </div>
       <div class="channel-block">
-        <div class="channel-label">Channel B — Passphrase</div>
+        <div class="channel-label">
+          <!-- Key icon -->
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m15.362 9.065 1.32 1.32c.995.995 1.345-.84 2.734-1.07.466-.078.877-.236 1.053-.752.156-.456-.021-.885-.574-1.438L18.5 5.731M7.5 21a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9m3.5-8L21 3"/></svg>
+          Channel B — Passphrase
+        </div>
         <div class="channel-value passphrase" id="passphrase-display"></div>
-        <button class="btn-copy-small" id="copy-pass-btn">Copy passphrase</button>
+        <button class="btn-copy-small" id="copy-pass-btn">
+          <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20.829 12.861c.171-.413.171-.938.171-1.986s0-1.573-.171-1.986a2.25 2.25 0 0 0-1.218-1.218c-.413-.171-.938-.171-1.986-.171H11.1c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C7.5 9.209 7.5 9.839 7.5 11.1v6.525c0 1.048 0 1.573.171 1.986.229.551.667.99 1.218 1.218.413.171.938.171 1.986.171s1.573 0 1.986-.171m7.968-7.968a2.25 2.25 0 0 1-1.218 1.218c-.413.171-.938.171-1.986.171s-1.573 0-1.986.171a2.25 2.25 0 0 0-1.218 1.218c-.171.413-.171.938-.171 1.986s0 1.573-.171 1.986a2.25 2.25 0 0 1-1.218 1.218m7.968-7.968a11.68 11.68 0 0 1-7.75 7.9l-.218.068M16.5 7.5v-.9c0-1.26 0-1.89-.245-2.371a2.25 2.25 0 0 0-.983-.984C14.79 3 14.16 3 12.9 3H6.6c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C3 4.709 3 5.339 3 6.6v6.3c0 1.26 0 1.89.245 2.371.216.424.56.768.984.984.48.245 1.111.245 2.372.245H7.5"/></svg>
+          Copy passphrase
+        </button>
       </div>
     </div>
 
     <div class="qr-section">
-      <button class="qr-toggle" id="qr-toggle">▼ Show QR Code</button>
+      <button class="qr-toggle" id="qr-toggle">
+        <!-- Refresh/QR proxy: using link icon for QR toggle context -->
+        <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M3 5.5A2.5 2.5 0 0 1 5.5 3H9a.5.5 0 0 1 .5.5v5A.5.5 0 0 1 9 9H5.5A2.5 2.5 0 0 1 3 6.5zM3 17.5A2.5 2.5 0 0 1 5.5 15H9a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-.5.5H5.5A2.5 2.5 0 0 1 3 18.5zM15 3.5a.5.5 0 0 1 .5-.5H19a2.5 2.5 0 0 1 2.5 2.5v1a2.5 2.5 0 0 1-2.5 2.5h-3.5a.5.5 0 0 1-.5-.5zM5.5 5.5h2v1h-2zM5.5 17.5h2v1h-2zM17.5 5.5h1v1h-1zM15 12a.5.5 0 0 1 .5-.5H19a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1v1.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V13h-1a.5.5 0 0 1-.5-.5zM3 12.5A.5.5 0 0 1 3.5 12H12a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H9v1.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V14H3.5a.5.5 0 0 1-.5-.5zM17 17a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5H19v1.5a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5V18h-.5a.5.5 0 0 1-.5-.5z"/></svg>
+        Show QR Code
+        <!-- Chevron down -->
+        <svg class="chevron" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m6 9 6 6 6-6"/></svg>
+      </button>
       <div class="qr-panel" id="qr-panel">
         <div class="qr-tabs">
           <div class="qr-tab active" id="tab-combined" data-mode="combined">Combined (link + passphrase)</div>
@@ -202,14 +214,25 @@
   </div>
 
   <div class="security-note">
-    <span class="dot"></span><strong>Two-channel security</strong> — share the link and passphrase via different channels.<br>
-    <span class="dot"></span><strong>Zero-knowledge</strong> — server stores only ciphertext. Passphrase never transmitted.<br>
-    <span class="dot"></span><strong>One-time read</strong> — secret deleted immediately on first retrieval.
+    <div class="security-row" style="margin-bottom:4px">
+      <!-- Shield-check icon -->
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m10.258 11.242 1.034 1.181c.095.109.266.1.35-.016l2.1-2.907"/><path d="M11.467 20.82a.88.88 0 0 0 1.066 0C14.168 19.593 19 15.586 19 11.016v-4.93a.514.514 0 0 0-.457-.515 12.05 12.05 0 0 1-5.582-2.046l-.61-.417a.62.62 0 0 0-.702 0l-.61.417a12.05 12.05 0 0 1-5.582 2.046.514.514 0 0 0-.457.515v4.93c0 4.57 4.832 8.577 6.467 9.802"/></svg>
+      <strong>Two-channel security</strong> — share the link and passphrase via different channels.
+    </div>
+    <div class="security-row" style="margin-bottom:4px">
+      <!-- Lock icon -->
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M8 10V8c0-2.761 1.239-5 4-5s4 2.239 4 5v2M3.5 17.8v-4.6c0-1.12 0-1.68.218-2.107a2 2 0 0 1 .874-.875c.428-.217.988-.217 2.108-.217h10.6c1.12 0 1.68 0 2.108.217a2 2 0 0 1 .874.874c.218.428.218.988.218 2.108v4.6c0 1.12 0 1.68-.218 2.108a2 2 0 0 1-.874.874C18.98 21 18.42 21 17.3 21H6.7c-1.12 0-1.68 0-2.108-.218a2 2 0 0 1-.874-.874C3.5 19.481 3.5 18.921 3.5 17.8"/></svg>
+      <strong>Zero-knowledge</strong> — server stores only ciphertext. Passphrase never transmitted.
+    </div>
+    <div class="security-row">
+      <!-- Trash icon -->
+      <svg fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m18 9-.84 8.398c-.127 1.273-.19 1.909-.48 2.39a2.5 2.5 0 0 1-1.075.973C15.098 21 14.46 21 13.18 21h-2.36c-1.279 0-1.918 0-2.425-.24a2.5 2.5 0 0 1-1.076-.973c-.288-.48-.352-1.116-.48-2.389L6 9m7.5 6.5v-5m-3 5v-5m-6-4h4.615m0 0 .386-2.672c.112-.486.516-.828.98-.828h3.038c.464 0 .867.342.98.828l.386 2.672m-5.77 0h5.77m0 0H19.5"/></svg>
+      <strong>One-time read</strong> — secret deleted immediately on first retrieval.
+    </div>
   </div>
 </div>
 
 <script>
-// ── Wordlist (100 words for 3-word passphrase = 1M combinations) ─────────────
 const WORDS = [
   'amber','arctic','atlas','azure','badge','beacon','birch','blaze','bolt','bridge',
   'brook','cabin','cedar','cipher','citrus','cliff','cloud','cobra','comet','coral',
@@ -229,19 +252,13 @@ function generatePassphrase() {
   return Array.from(arr).map(n => WORDS[n % WORDS.length]).join('-');
 }
 
-// ── PBKDF2 key derivation from passphrase ────────────────────────────────────
 async function deriveKey(passphrase, saltB64) {
   const enc = new TextEncoder();
-  const keyMaterial = await crypto.subtle.importKey(
-    'raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']
-  );
+  const keyMaterial = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
   const salt = Uint8Array.from(atob(saltB64), c => c.charCodeAt(0));
   return crypto.subtle.deriveKey(
     { name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' },
-    keyMaterial,
-    { name: 'AES-GCM', length: 256 },
-    false,
-    ['encrypt', 'decrypt']
+    keyMaterial, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
   );
 }
 
@@ -250,19 +267,12 @@ async function encryptText(plaintext, passphrase) {
   const ivBytes   = crypto.getRandomValues(new Uint8Array(12));
   const salt = btoa(String.fromCharCode(...saltBytes));
   const iv   = btoa(String.fromCharCode(...ivBytes));
-
-  const key = await deriveKey(passphrase, salt);
+  const key  = await deriveKey(passphrase, salt);
   const encoded = new TextEncoder().encode(plaintext);
   const cipherbuf = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: ivBytes }, key, encoded);
-
-  return {
-    ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipherbuf))),
-    salt,
-    iv
-  };
+  return { ciphertext: btoa(String.fromCharCode(...new Uint8Array(cipherbuf))), salt, iv };
 }
 
-// ── UI refs ───────────────────────────────────────────────────────────────────
 const sendBtn        = document.getElementById('send-btn');
 const pasteBtn       = document.getElementById('paste-btn');
 const input          = document.getElementById('secret-input');
@@ -280,34 +290,34 @@ const qrPanel        = document.getElementById('qr-panel');
 const qrNote         = document.getElementById('qr-note');
 
 let countdownInterval = null;
-let currentLinkUrl   = '';
-let currentCombinedUrl = '';
+let currentLinkUrl = '', currentCombinedUrl = '';
 
-function showError(msg) { errorMsg.textContent = msg; errorMsg.classList.add('visible'); }
-function clearError()   { errorMsg.classList.remove('visible'); }
+// SVG paths for check feedback (inline so no external dep needed)
+const SVG_CHECK = `<svg style="width:11px;height:11px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="m6 13.626 1.606 1.722c.886.95 1.329 1.424 1.825 1.574.436.131.9.096 1.315-.1.473-.224.852-.761 1.612-1.836L18 7"/></svg>`;
+const SVG_COPY  = `<svg style="width:11px;height:11px" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20.829 12.861c.171-.413.171-.938.171-1.986s0-1.573-.171-1.986a2.25 2.25 0 0 0-1.218-1.218c-.413-.171-.938-.171-1.986-.171H11.1c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C7.5 9.209 7.5 9.839 7.5 11.1v6.525c0 1.048 0 1.573.171 1.986.229.551.667.99 1.218 1.218.413.171.938.171 1.986.171s1.573 0 1.986-.171m7.968-7.968a2.25 2.25 0 0 1-1.218 1.218c-.413.171-.938.171-1.986.171s-1.573 0-1.986.171a2.25 2.25 0 0 0-1.218 1.218c-.171.413-.171.938-.171 1.986s0 1.573-.171 1.986a2.25 2.25 0 0 1-1.218 1.218m7.968-7.968a11.68 11.68 0 0 1-7.75 7.9l-.218.068M16.5 7.5v-.9c0-1.26 0-1.89-.245-2.371a2.25 2.25 0 0 0-.983-.984C14.79 3 14.16 3 12.9 3H6.6c-1.26 0-1.89 0-2.371.245a2.25 2.25 0 0 0-.984.984C3 4.709 3 5.339 3 6.6v6.3c0 1.26 0 1.89.245 2.371.216.424.56.768.984.984.48.245 1.111.245 2.372.245H7.5"/></svg>`;
 
 function copyText(text, btn, label) {
   navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = '✓ Copied';
-    setTimeout(() => { btn.textContent = label; }, 2000);
+    btn.innerHTML = SVG_CHECK + ' Copied';
+    setTimeout(() => { btn.innerHTML = SVG_COPY + ' ' + label; }, 2000);
   }).catch(() => { btn.textContent = 'Copy manually'; });
 }
 
-// ── Paste from clipboard ──────────────────────────────────────────────────────
 pasteBtn.addEventListener('click', async () => {
   try {
     const text = await navigator.clipboard.readText();
-    if (text) { input.value = text; input.focus(); clearError(); }
-    else showError('Clipboard is empty.');
+    if (text) { input.value = text; input.focus(); errorMsg.classList.remove('visible'); }
+    else { errorMsg.textContent = 'Clipboard is empty.'; errorMsg.classList.add('visible'); }
   } catch {
-    showError('Clipboard access denied — paste manually (Ctrl+V).');
+    errorMsg.textContent = 'Clipboard access denied — paste manually (Ctrl+V / Cmd+V).';
+    errorMsg.classList.add('visible');
   }
 });
 
-// ── QR toggle & tabs ──────────────────────────────────────────────────────────
 qrToggle.addEventListener('click', () => {
   const open = qrPanel.classList.toggle('open');
-  qrToggle.textContent = open ? '▲ Hide QR Code' : '▼ Show QR Code';
+  qrToggle.classList.toggle('open', open);
+  qrToggle.childNodes[2].textContent = open ? ' Hide QR Code' : ' Show QR Code';
 });
 
 let qrMode = 'combined';
@@ -324,59 +334,42 @@ function renderQR() {
   if (!currentLinkUrl) return;
   const url = qrMode === 'combined' ? currentCombinedUrl : currentLinkUrl;
   qrDiv.innerHTML = '';
-  new QRCode(qrDiv, {
-    text: url, width: 160, height: 160,
-    colorDark: '#000000', colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.M
-  });
+  new QRCode(qrDiv, { text: url, width: 160, height: 160, colorDark: '#000', colorLight: '#fff', correctLevel: QRCode.CorrectLevel.M });
   qrNote.textContent = qrMode === 'combined'
-    ? 'Scan to open link with passphrase pre-filled. Secret auto-decrypts instantly.'
+    ? 'Scan to open with passphrase pre-filled. Secret auto-decrypts instantly.'
     : 'Scan for link only. Receiver must enter passphrase manually.';
 }
 
-// ── Send ──────────────────────────────────────────────────────────────────────
 sendBtn.addEventListener('click', async () => {
   const text = input.value.trim();
-  if (!text) { showError('Please enter a secret to send.'); return; }
-  if (text.length > 8000) { showError('Secret is too long (max ~8000 chars).'); return; }
-
-  clearError();
+  if (!text) { errorMsg.textContent = 'Please enter a secret to send.'; errorMsg.classList.add('visible'); return; }
+  if (text.length > 8000) { errorMsg.textContent = 'Secret too long (max ~8000 chars).'; errorMsg.classList.add('visible'); return; }
+  errorMsg.classList.remove('visible');
   sendBtn.disabled = true;
-  sendBtn.textContent = 'Encrypting…';
+  sendBtn.innerHTML = sendBtn.innerHTML.replace('Encrypt &amp; Send', 'Encrypting…');
 
   try {
     const passphrase = generatePassphrase();
     const { ciphertext, salt, iv } = await encryptText(text, passphrase);
     const expiryMs = parseInt(document.getElementById('expiry-select').value);
 
-    const res = await fetch('/send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ciphertext, iv, salt, expiry: expiryMs })
-    });
-
+    const res  = await fetch('/send', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ciphertext, iv, salt, expiry: expiryMs }) });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Server error');
 
     const { id, expires_in } = data;
-    const origin = window.location.origin;
+    currentLinkUrl     = `${window.location.origin}/${id}`;
+    currentCombinedUrl = `${window.location.origin}/${id}#${encodeURIComponent(passphrase)}`;
 
-    currentLinkUrl     = `${origin}/${id}`;
-    currentCombinedUrl = `${origin}/${id}#${encodeURIComponent(passphrase)}`;
-
-    // Update UI
-    linkDisplay.textContent     = currentLinkUrl;
-    passphraseDisp.textContent  = passphrase;
+    linkDisplay.textContent    = currentLinkUrl;
+    passphraseDisp.textContent = passphrase;
     resultCard.classList.add('visible');
     input.value = '';
 
     copyLinkBtn.onclick = () => copyText(currentLinkUrl, copyLinkBtn, 'Copy link');
     copyPassBtn.onclick = () => copyText(passphrase, copyPassBtn, 'Copy passphrase');
-
-    // Render QR in current mode
     renderQR();
 
-    // Countdown
     if (countdownInterval) clearInterval(countdownInterval);
     const expiresAt = Date.now() + expires_in;
     timerBar.style.transition = `width ${expires_in}ms linear`;
@@ -385,20 +378,16 @@ sendBtn.addEventListener('click', async () => {
 
     countdownInterval = setInterval(() => {
       const remaining = Math.max(0, expiresAt - Date.now());
-      const secs = Math.ceil(remaining / 1000);
-      countdownEl.textContent = `${secs}s`;
-      if (remaining <= 0) {
-        clearInterval(countdownInterval);
-        countdownEl.textContent = 'expired';
-        resultCard.style.borderColor = 'var(--danger)';
-      }
+      countdownEl.textContent = `${Math.ceil(remaining / 1000)}s`;
+      if (remaining <= 0) { clearInterval(countdownInterval); countdownEl.textContent = 'expired'; resultCard.style.borderColor = 'var(--danger)'; }
     }, 250);
 
   } catch (err) {
-    showError(err.message || 'Failed to send secret.');
+    errorMsg.textContent = err.message || 'Failed to send secret.';
+    errorMsg.classList.add('visible');
   } finally {
     sendBtn.disabled = false;
-    sendBtn.textContent = 'Encrypt & Send →';
+    sendBtn.innerHTML = sendBtn.innerHTML.replace('Encrypting…', 'Encrypt &amp; Send');
   }
 });
 </script>
