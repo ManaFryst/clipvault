@@ -7,7 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
-  <script src="/qr.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -337,11 +336,28 @@ document.querySelectorAll('.qr-tab').forEach(tab => {
   });
 });
 
+const ICON_SVG_B64 = btoa(`<svg width="24" height="24" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="#0a0a0b" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><path d="M20.5 15.8V8.2a1.91 1.91 0 0 0-.944-1.645l-6.612-3.8a1.88 1.88 0 0 0-1.888 0l-6.612 3.8A1.9 1.9 0 0 0 3.5 8.2v7.602a1.91 1.91 0 0 0 .944 1.644l6.612 3.8a1.88 1.88 0 0 0 1.888 0l6.612-3.8A1.9 1.9 0 0 0 20.5 15.8M10.905 8l-1.437 8m4.937-8-1.437 8m3.314-5.75H7.718m8.564 3.5H7.718"/></svg>`);
+const ICON_URI = 'data:image/svg+xml;base64,' + ICON_SVG_B64;
+let _qrInstance = null;
+
 function renderQR() {
   if (!currentLinkUrl) return;
   const url = qrMode === 'combined' ? currentCombinedUrl : currentLinkUrl;
   qrDiv.innerHTML = '';
-  ClipVaultQR.render(url, qrDiv, { size: 200, fg: '#0a0a0b', bg: '#ffffff' });
+  _qrInstance = new QRCodeStyling({
+    width: 200,
+    height: 200,
+    data: url,
+    margin: 4,
+    qrOptions: { errorCorrectionLevel: 'H' },
+    image: ICON_URI,
+    imageOptions: { hideBackgroundDots: true, imageSize: 0.28, margin: 3 },
+    dotsOptions:          { color: '#0a0a0b', type: 'extra-rounded' },
+    backgroundOptions:    { color: '#ffffff' },
+    cornersSquareOptions: { color: '#0a0a0b', type: 'extra-rounded' },
+    cornersDotOptions:    { color: '#0a0a0b', type: 'dot' }
+  });
+  _qrInstance.append(qrDiv);
   qrNote.textContent = qrMode === 'combined'
     ? 'Scan to open with passphrase pre-filled. Secret auto-decrypts instantly.'
     : 'Scan for link only. Receiver must enter passphrase manually.';
