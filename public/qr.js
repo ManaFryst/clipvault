@@ -50,7 +50,7 @@
 
   // ── Canvas helpers ────────────────────────────────────────────────────────
   function roundedRect(ctx, x, y, w, h, r) {
-    r = Math.min(r, w / 2, h / 2, 1);
+    r = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.lineTo(x + w - r, y);
@@ -70,14 +70,13 @@
     const cy0 = y0 * cell + cell / 2;
     const cx1 = x1 * cell + cell / 2;
     const cy1 = y1 * cell + cell / 2;
+    const left   = Math.min(cx0, cx1) - r;
+    const top    = Math.min(cy0, cy1) - r;
+    const w      = Math.abs(cx1 - cx0) + lw;
+    const h      = Math.abs(cy1 - cy0) + lw;
     ctx.fillStyle = color;
-    roundedRect(ctx,
-      Math.min(cx0, cx1) - r,
-      Math.min(cy0, cy1) - r,
-      Math.abs(cx1 - cx0) + lw,
-      Math.abs(cy1 - cy0) + lw,
-      r
-    );
+    ctx.beginPath();
+    ctx.roundRect(left, top, w, h, r);
     ctx.fill();
   }
 
@@ -160,15 +159,28 @@
   // ── Finder pattern (rounded square) ──────────────────────────────────────
   function drawFinder(ctx, px, py, cell, fg, bg) {
     const s  = cell;
-    const ro = s * 1.2;
-    const ri = s * 0.8;
+    // outer ring: nicely rounded corners ~30% of cell size
+    const ro = s * 1.4;
+    // inner dot: fully rounded (circle-ish)
+    const ri = s * 1.0;
 
+    // Outer filled square
     ctx.fillStyle = fg;
-    roundedRect(ctx, px,           py,           7 * s, 7 * s, ro);       ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(px, py, 7 * s, 7 * s, ro);
+    ctx.fill();
+
+    // White gap
     ctx.fillStyle = bg;
-    roundedRect(ctx, px + s,       py + s,       5 * s, 5 * s, ro * 0.55); ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(px + s, py + s, 5 * s, 5 * s, ro * 0.5);
+    ctx.fill();
+
+    // Inner filled dot
     ctx.fillStyle = fg;
-    roundedRect(ctx, px + 2 * s,   py + 2 * s,   3 * s, 3 * s, ri);       ctx.fill();
+    ctx.beginPath();
+    ctx.roundRect(px + 2 * s, py + 2 * s, 3 * s, 3 * s, ri);
+    ctx.fill();
   }
 
   // ── Centre icon: HashHexagon ──────────────────────────────────────────────
