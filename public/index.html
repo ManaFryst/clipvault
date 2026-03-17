@@ -6,7 +6,7 @@
   <title>ClipVault — Send Secret</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+  <script src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
   <script src="/qr.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -108,8 +108,8 @@
     .qr-tab.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
     .qr-wrapper { display: flex; flex-direction: column; align-items: center; gap: 10px; }
     .qr-note { font-family: var(--mono); font-size: 10px; color: var(--muted); text-align: center; max-width: 280px; line-height: 1.6; }
-    #qrcode { border-radius: 6px; overflow: hidden; display: inline-block; line-height: 0; }
-    #qrcode canvas { display: block; border-radius: 6px; }
+    #qrcode { border-radius: 8px; overflow: hidden; display: inline-block; line-height: 0; background: #fff; }
+    #qrcode canvas { display: block; }
 
     /* Timer */
     .timer-bar-wrap { margin-top: 20px; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
@@ -341,16 +341,7 @@ function renderQR() {
   if (!currentLinkUrl) return;
   const url = qrMode === 'combined' ? currentCombinedUrl : currentLinkUrl;
   qrDiv.innerHTML = '';
-  const canvas = document.createElement('canvas');
-  qrDiv.appendChild(canvas);
-  ClipVaultQR.render(url, canvas, {
-    cell: 12,
-    quiet: 3,
-    fg: '#0a0a0b',
-    bg: '#ffffff',
-    lineWFrac: 0.66,
-    iconFraction: 0.22
-  });
+  ClipVaultQR.render(url, qrDiv, { size: 200, fg: '#0a0a0b', bg: '#ffffff' });
   qrNote.textContent = qrMode === 'combined'
     ? 'Scan to open with passphrase pre-filled. Secret auto-decrypts instantly.'
     : 'Scan for link only. Receiver must enter passphrase manually.';
